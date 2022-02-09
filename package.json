@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "discord.js": "^13.6.0",
+    "mariadb": "^2.5.5",
+    "source-server-query": "^2.0.4"
+  },
+  "devDependencies": {
+    "jest": "^27.5.1"
+  }
+}
