@@ -154,7 +154,7 @@ function warningNotifyCheck() {
 async function setupConnection() {
     conn = await pool.getConnection();
     await conn.query("CREATE TABLE IF NOT EXISTS servers(id INT AUTO_INCREMENT NOT NULL PRIMARY KEY, servername NVARCHAR(50) NOT NULL, ip NVARCHAR(50) NOT NULL, port NVARCHAR(50) NOT NULL, CONSTRAINT ip_port_unique UNIQUE(ip, port))")
-    await conn.query("CREATE TABLE IF NOT EXISTS online(sid INT NOT NULL PRIMARY KEY, date DATETIME NOT NULL, players INT NOT NULL, FOREIGN KEY (sid) REFERENCES servers (id))")
+    await conn.query("CREATE TABLE IF NOT EXISTS online(id INT AUTO_INCREMENT NOT NULL PRIMARY KEY, sid INT NOT NULL, date DATETIME NOT NULL, players INT NOT NULL, FOREIGN KEY (sid) REFERENCES servers (id))")
     try {
         await conn.query(`INSERT IGNORE INTO servers (servername, ip, port) VALUES ('${process.env.SERVER_NAME}', '${process.env.SERVER_IP}', '${process.env.SERVER_PORT}');`);
     } catch (e) {}
