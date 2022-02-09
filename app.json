@@ -7,76 +7,21 @@
       "exec_mode"      : "cluster",
       "instances"      : 1,
       "env": {
-        "DATABASE_HOST": {
-          "description": "Database Host",
-          "required": "true",
-          "value": ""
-        },
-        "DATABASE_NAME": {
-          "description": "Database name",
-          "required": "true",
-          "value": ""
-        },
-        "DATABASE_USER": {
-          "description": "Database username",
-          "required": "true",
-          "value": ""
-        },
-        "DATABASE_PASSWORD": {
-          "description": "Database password",
-          "required": "true",
-          "value": ""
-        },
-        "SERVER_NAME": {
-          "description": "Server name CS:GO",
-          "required": "true",
-          "value": ""
-        },
-        "SERVER_IP": {
-          "description": "Server IP CS:GO",
-          "required": "true",
-          "value": ""
-        },
-        "SERVER_PORT": {
-          "description": "Server port CS:GO",
-          "required": "true",
-          "value": ""
-        },
-        "WEBHOOK_URL": {
-          "description": "Link to the discord webhook",
-          "required": "true",
-          "value": ""
-        },
-        "WEBHOOK_NAME": {
-          "description": "Discord webhook name",
-          "required": "true",
-          "value": "ServerListener"
-        },
-        "WEBHOOK_IMG_URL": {
-          "description": "Discord webhook image URL",
-          "required": "true",
-          "value": "https://miro.medium.com/max/1200/1*ew149PTZrfb6ly3aIMpM8w.jpeg"
-        },
-        "WEBHOOK_COLOR": {
-          "description": "Color of discord webhook",
-          "required": "true",
-          "value": "#644674"
-        },
-        "DISCORD_USER_ID": {
-          "description": "Discord user ID who will receive the notification",
-          "required": "true",
-          "value": ""
-        },
-        "MAX_WARNING_COUNTER": {
-          "description": "Maximum number of warnings after a server crash",
-          "required": "true",
-          "value": "3"
-        },
-        "PLAYERS_DIFFERENCE": {
-          "description": "At what difference of players will there be a warning",
-          "required": "true",
-          "value": "10"
-        }
+        "DATABASE_HOST":  "",
+        "DATABASE_NAME": "",
+        "DATABASE_USER":  "",
+        "DATABASE_PASSWORD": "",
+        "SERVER_NAME": "",
+        "SERVER_IP": "",
+        "SERVER_PORT":  "",
+        "WEBHOOK_URL": "",
+        "WEBHOOK_NAME": "ServerListener",
+        "WEBHOOK_IMG_URL": "https://miro.medium.com/max/1200/1*ew149PTZrfb6ly3aIMpM8w.jpeg",
+        "WEBHOOK_COLOR": "#644674",
+        "DISCORD_USER_ID": "",
+        "MAX_WARNING_COUNTER": "3",
+        "PLAYERS_DIFFERENCE": "10",
+        "INTERVAL_REQUEST": "60"
       },
       "time": true
     }
