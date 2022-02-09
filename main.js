@@ -53,7 +53,10 @@ async function main(){
                     name: process.env.WEBHOOK_NAME,
                     iconURL: process.env.WEBHOOK_IMG_URL
                 })
-                .setTitle(` :exclamation:  Резкое падение онлайна на сервере ${process.env.SERVER_NAME} | ${playersCheckData.prevPlayers}->${playersCheckData.currentPlayers}`)
+                .setTitle(` :exclamation:  Резкое падение онлайна на сервере ${process.env.SERVER_NAME}`)
+                .addField('Было', `${playersCheckData.prevPlayers}, true`)
+                .addField('Стало', `${playersCheckData.currentPlayers}, true`)
+                .addField('Карта', `${data.map}`)
                 .setColor(process.env.WEBHOOK_COLOR)
 
             await webhookClient.send({
