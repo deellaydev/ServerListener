@@ -2,8 +2,7 @@
   "apps": [
     {
       "name"           : "server-listener",
-      "script"         : "node",
-      "args"           : "main.js",
+      "script"         : "./main.js",
       "exec_mode"      : "cluster",
       "instances"      : 1,
       "env": {
