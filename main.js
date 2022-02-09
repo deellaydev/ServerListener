@@ -51,7 +51,7 @@ async function main(){
                     name: process.env.WEBHOOK_NAME,
                     iconURL: process.env.WEBHOOK_IMG_URL
                 })
-                .setTitle(` :white_check_mark: Резкое падение онлайна`)
+                .setTitle(` :exclamation:  Резкое падение онлайна на сервере ${process.env.SERVER_NAME}`)
                 .setColor(process.env.WEBHOOK_COLOR)
 
             await webhookClient.send({
