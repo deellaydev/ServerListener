@@ -22,14 +22,6 @@ let conn;
 let playersNum = []
 
 async function main(){
-    const currentDate = new Date();
-    const currentDay = ('0' + currentDate.getDate()).slice(-2)
-    const currentMonth = ('0' + currentDate.getMonth()+1).slice(-2)
-    const currentYear = currentDate.getFullYear()
-    const currentHours = ('0' + currentDate.getHours()).slice(-2)
-    const currentMinutes = ('0' + currentDate.getMinutes()).slice(-2)
-    const currentSeconds = ('0' + currentDate.getSeconds()).slice(-2)
-    const stringDate = `${currentDay}.${currentMonth}.${currentYear} ${currentHours}:${currentMinutes}:${currentSeconds}`
 
     let serverId;
     try {
@@ -51,7 +43,7 @@ async function main(){
     }
     try {
         const data = await info(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 5000)
-        conn.query(`INSERT INTO online(sid, date, players) VALUES ('${serverId}','${stringDate}','${data.players}')`)
+        conn.query(`INSERT INTO online(sid, date, players) VALUES ('${serverId}',NOW(),'${data.players}')`)
 
         if (playersCountCheck(data.players, process.env.PLAYERS_DIFFERENCE)){
             const embed = new MessageEmbed()
