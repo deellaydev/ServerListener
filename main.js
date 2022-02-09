@@ -54,8 +54,8 @@ async function main(){
                     iconURL: process.env.WEBHOOK_IMG_URL
                 })
                 .setTitle(` :exclamation:  Резкое падение онлайна на сервере ${process.env.SERVER_NAME}`)
-                .addField('Было', `${playersCheckData.prevPlayers}, true`)
-                .addField('Стало', `${playersCheckData.currentPlayers}, true`)
+                .addField('Было', `${playersCheckData.prevPlayers}`, true)
+                .addField('Стало', `${playersCheckData.currentPlayers}`, true)
                 .addField('Карта', `${data.map}`)
                 .setColor(process.env.WEBHOOK_COLOR)
 
