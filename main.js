@@ -33,7 +33,7 @@ async function main(){
 
     let serverId;
     try {
-        serverId = await conn.query(`SELECT id FROM servers WHERE ip='${process.env.SERVER_ip}' AND port='${process.env.SERVER_PORT}'`).then(res => res[0].id)
+        serverId = await conn.query(`SELECT id FROM servers WHERE ip='${process.env.SERVER_IP}' AND port='${process.env.SERVER_PORT}'`).then(res => res[0].id)
     }
     catch (e) {
         const embed = new MessageEmbed()
@@ -45,6 +45,7 @@ async function main(){
             .setColor('#ff0000')
 
         await webhookClient.send({
+            content: `<@${process.env.DISCORD_USER_ID}>`,
             embeds: [embed]
         })
     }
@@ -156,7 +157,6 @@ async function setupConnection() {
     conn = await pool.getConnection();
     await conn.query("CREATE TABLE IF NOT EXISTS servers(id INT AUTO_INCREMENT NOT NULL PRIMARY KEY, servername NVARCHAR(50) NOT NULL, ip NVARCHAR(50) NOT NULL, port NVARCHAR(50) NOT NULL, CONSTRAINT ip_port_unique UNIQUE(ip, port))")
     await conn.query("CREATE TABLE IF NOT EXISTS online(sid INT NOT NULL, date NVARCHAR(50) NOT NULL, players INT NOT NULL, FOREIGN KEY (sid) REFERENCES servers (id))")
-
     try {
         await conn.query(`INSERT IGNORE INTO servers (servername, ip, port) VALUES ('${process.env.SERVER_NAME}', '${process.env.SERVER_IP}', '${process.env.SERVER_PORT}');`);
     } catch (e) {}
@@ -165,11 +165,7 @@ async function setupConnection() {
 setupConnection().then(() => {
     setInterval(() => {
         main();
-    }, 5000);
+    }, 60000);
 }).catch(e => {
     console.error('unexpected exception', e);
 })
-
-module.exports = {
-    playersCountCheck
-}
