@@ -45,13 +45,15 @@ async function main(){
         const data = await info(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 5000)
         conn.query(`INSERT INTO online(sid, date, players) VALUES ('${serverId}',NOW(),'${data.players}')`)
 
-        if (playersCountCheck(data.players, process.env.PLAYERS_DIFFERENCE)){
+        let playersCheckData = await playersCountCheck(data.players)
+
+        if (playersCheckData.warning){
             const embed = new MessageEmbed()
                 .setAuthor({
                     name: process.env.WEBHOOK_NAME,
                     iconURL: process.env.WEBHOOK_IMG_URL
                 })
-                .setTitle(` :exclamation:  Резкое падение онлайна на сервере ${process.env.SERVER_NAME}`)
+                .setTitle(` :exclamation:  Резкое падение онлайна на сервере ${process.env.SERVER_NAME} | ${playersCheckData.prevPlayers}->${playersCheckData.currentPlayers}`)
                 .setColor(process.env.WEBHOOK_COLOR)
 
             await webhookClient.send({
@@ -95,7 +97,11 @@ function playersCountCheck(players) {
         playersNum.shift()
     }
     if (playersNum.length === 2){
-        return playersNum[0] - playersNum[1] >= process.env.PLAYERS_DIFFERENCE;
+        return {
+            warning: playersNum[0] - playersNum[1] >= process.env.PLAYERS_DIFFERENCE,
+            prevPlayers: playersNum[0],
+            currentPlayers: playersNum[1]
+        };
     }
     return false
 
