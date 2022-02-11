@@ -20,6 +20,7 @@ const webhookClient = new WebhookClient({
 
 let conn;
 let playersNum = []
+let mapChecker = []
 
 async function main(){
 
@@ -45,7 +46,7 @@ async function main(){
         const data = await info(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 5000)
         conn.query(`INSERT INTO online(sid, date, players) VALUES ('${serverId}',NOW(),'${data.players}')`)
 
-        let playersCheckData = await playersCountCheck(data.players)
+        let playersCheckData = await playersCountCheck(data.players, data.map)
 
         if (playersCheckData.warning){
             const embed = new MessageEmbed()
@@ -54,9 +55,10 @@ async function main(){
                     iconURL: process.env.WEBHOOK_IMG_URL
                 })
                 .setTitle(` :exclamation:  Резкое падение онлайна на сервере ${process.env.SERVER_NAME}`)
-                .addField('Было', `${playersCheckData.prevPlayers}`, true)
-                .addField('Стало', `${playersCheckData.currentPlayers}`, true)
-                .addField('Карта', `${data.map}`)
+                .setFields(
+                    {name: 'Было', value: `${playersCheckData.prevPlayers}\n${playersCheckData.prevMap}`, inline: true},
+                    {name: 'Стало', value: `${playersCheckData.currentPlayers}\n${playersCheckData.currentMap}`, inline: true}
+                )
                 .setColor(process.env.WEBHOOK_COLOR)
 
             await webhookClient.send({
@@ -93,17 +95,21 @@ async function main(){
     }
 }
 
-function playersCountCheck(players) {
+function playersCountCheck(players, map) {
 
     playersNum.push(players)
+    mapChecker.push(map)
     if (playersNum.length > 2) {
         playersNum.shift()
+        mapChecker.shift()
     }
     if (playersNum.length === 2){
         return {
             warning: playersNum[0] - playersNum[1] >= process.env.PLAYERS_DIFFERENCE,
             prevPlayers: playersNum[0],
-            currentPlayers: playersNum[1]
+            currentPlayers: playersNum[1],
+            prevMap: mapChecker[0],
+            currentMap: mapChecker[1],
         };
     }
     return false
