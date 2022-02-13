@@ -43,7 +43,7 @@ async function main(){
         })
     }
     try {
-        const data = await info(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 5000)
+        const data = await info(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 10000)
         conn.query(`INSERT INTO online(sid, date, players) VALUES ('${serverId}',NOW(),'${data.players}')`)
 
         let playersCheckData = await playersCountCheck(data.players, data.map)
