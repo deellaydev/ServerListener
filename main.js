@@ -11,7 +11,6 @@ const pool = mariadb.createPool({
 
 let warningNotify = true
 let warningCounter = 0
-let lastWarning = Date.now()
 
 const webhookClient = new WebhookClient({
     id: process.env.WEBHOOK_URL.split('/')[5],
@@ -43,7 +42,7 @@ async function main(){
         })
     }
     try {
-        const data = await info(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 10000)
+        const data = await info(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 7000)
         conn.query(`INSERT INTO online(sid, date, players) VALUES ('${serverId}',NOW(),'${data.players}')`)
 
         let playersCheckData = await playersCountCheck(data.players, data.map)
@@ -57,7 +56,8 @@ async function main(){
                 .setTitle(` :exclamation:  Резкое падение онлайна на сервере ${process.env.SERVER_NAME}`)
                 .setFields(
                     {name: 'Было', value: `${playersCheckData.prevPlayers}\n${playersCheckData.prevMap}`, inline: true},
-                    {name: 'Стало', value: `${playersCheckData.currentPlayers}\n${playersCheckData.currentMap}`, inline: true}
+                    {name: 'Стало', value: `${playersCheckData.currentPlayers}\n${playersCheckData.currentMap}`, inline: true},
+                    {name: 'CSGO_TV', value: `${csgotv[0].duration} ч.`}
                 )
                 .setColor(process.env.WEBHOOK_COLOR)
 
@@ -66,6 +66,8 @@ async function main(){
                 embeds: [embed]
             })
         }
+
+        warningCounter = 0;
 
         await conn.end()
     } catch (e) {
@@ -83,7 +85,7 @@ async function main(){
                     name: process.env.WEBHOOK_NAME,
                     iconURL: process.env.WEBHOOK_IMG_URL
                 })
-                .setTitle(` :white_check_mark: Оповещение сервера ${process.env.SERVER_NAME} включено`)
+                .setTitle(` :green_circle: Оповещение сервера ${process.env.SERVER_NAME} включено`)
                 .setColor(process.env.WEBHOOK_COLOR)
 
             await webhookClient.send({
@@ -138,10 +140,6 @@ function warningNotifyCheck() {
             embeds: [embed]
         })
 
-        if (Date.now() - lastWarning > 60000) {
-            warningCounter = 0
-        }
-
         if (warningCounter === +process.env.MAX_WARNING_COUNTER) {
             warningNotify = false
 
@@ -150,7 +148,7 @@ function warningNotifyCheck() {
                     name: process.env.WEBHOOK_NAME,
                     iconURL: process.env.WEBHOOK_IMG_URL
                 })
-                .setTitle(` :x: Оповещение сервера ${process.env.SERVER_NAME} отключено`)
+                .setTitle(` :red_circle: Оповещение сервера ${process.env.SERVER_NAME} отключено`)
                 .setColor(process.env.WEBHOOK_COLOR)
 
             webhookClient.send({
