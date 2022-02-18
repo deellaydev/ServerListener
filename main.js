@@ -42,10 +42,11 @@ async function main(){
         })
     }
     try {
-        const data = await info(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 7000)
+        const data = await info(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 10000)
         conn.query(`INSERT INTO online(sid, date, players) VALUES ('${serverId}',NOW(),'${data.players}')`)
 
         let playersCheckData = await playersCountCheck(data.players, data.map)
+        let csgotv = await players(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 5000).then(data => data.filter(item => item.name === 'VK.COM/LEGSS'))
 
         if (playersCheckData.warning){
             const embed = new MessageEmbed()
@@ -56,8 +57,10 @@ async function main(){
                 .setTitle(` :exclamation:  Резкое падение онлайна на сервере ${process.env.SERVER_NAME}`)
                 .setFields(
                     {name: 'Было', value: `${playersCheckData.prevPlayers}\n${playersCheckData.prevMap}`, inline: true},
-                    {name: 'Стало', value: `${playersCheckData.currentPlayers}\n${playersCheckData.currentMap}`, inline: true},
-                    {name: 'CSGO_TV', value: `${csgotv[0].duration} ч.`}
+                    {name: 'Стало', value: `${playersCheckData.currentPlayers}\n${playersCheckData.currentMap}`, inline: true}
+                )
+                .setFooter(
+                    {text: `🔘 Uptime - ${parseInt(parseInt(csgotv[0].duration)/3600)} ч.`}
                 )
                 .setColor(process.env.WEBHOOK_COLOR)
 
@@ -72,6 +75,26 @@ async function main(){
         await conn.end()
     } catch (e) {
         warningNotifyCheck()
+        if (warningCounter === 1) {
+            setTimeout(async () => {
+                let csgotv = await players(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 5000).then(data => data.filter(item => item.name === 'VK.COM/LEGSS'))
+
+                const embed = new MessageEmbed()
+                    .setAuthor({
+                        name: process.env.WEBHOOK_NAME,
+                        iconURL: process.env.WEBHOOK_IMG_URL
+                    })
+                    .setTitle(`Сервер ${process.env.SERVER_NAME}`)
+                    .setFooter(
+                        {text: `🔘 Uptime - ${parseInt(parseInt(csgotv[0].duration)/3600)} ч.`}
+                    )
+                    .setColor(process.env.WEBHOOK_COLOR)
+
+                await webhookClient.send({
+                    embeds: [embed]
+                })
+            }, 10000)
+        }
         return;
     }
     
