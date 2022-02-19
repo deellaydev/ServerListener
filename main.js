@@ -23,7 +23,7 @@ let mapChecker = []
 
 async function main(){
 
-    let serverId;
+    let serverId = 0;
     try {
         serverId = await conn.query(`SELECT id FROM servers WHERE ip='${process.env.SERVER_IP}' AND port='${process.env.SERVER_PORT}'`).then(res => res[0].id)
     }
@@ -47,6 +47,8 @@ async function main(){
 
         let playersCheckData = await playersCountCheck(data.players, data.map)
         let csgotv = await players(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 5000).then(data => data.filter(item => item.name === 'VK.COM/LEGSS'))
+        let csgotv_hours = Math.floor(parseInt(csgotv[0].duration) / 3600)
+        let csgotv_minutes = Math.floor(parseInt(csgotv[0].duration) / 60) - (csgotv_hours * 60)
 
         if (playersCheckData.warning){
             const embed = new MessageEmbed()
@@ -60,7 +62,7 @@ async function main(){
                     {name: 'Стало', value: `${playersCheckData.currentPlayers}\n${playersCheckData.currentMap}`, inline: true}
                 )
                 .setFooter(
-                    {text: `🔘 Uptime - ${parseInt(parseInt(csgotv[0].duration)/3600)} ч.`}
+                    {text: `🔘 Uptime - ${csgotv_hours} ч. ${csgotv_minutes} м.`}
                 )
                 .setColor(process.env.WEBHOOK_COLOR)
 
@@ -77,22 +79,26 @@ async function main(){
         warningNotifyCheck()
         if (warningCounter === 1) {
             setTimeout(async () => {
-                let csgotv = await players(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 5000).then(data => data.filter(item => item.name === 'VK.COM/LEGSS'))
+                try {
+                    let csgotv = await players(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 5000).then(data => data.filter(item => item.name === 'VK.COM/LEGSS'))
+                    let csgotv_hours = Math.floor(parseInt(csgotv[0].duration) / 3600)
+                    let csgotv_minutes = Math.floor(parseInt(csgotv[0].duration) / 60) - (csgotv_hours * 60)
 
-                const embed = new MessageEmbed()
-                    .setAuthor({
-                        name: process.env.WEBHOOK_NAME,
-                        iconURL: process.env.WEBHOOK_IMG_URL
+                    const embed = new MessageEmbed()
+                        .setAuthor({
+                            name: process.env.WEBHOOK_NAME,
+                            iconURL: process.env.WEBHOOK_IMG_URL
+                        })
+                        .setTitle(`Сервер ${process.env.SERVER_NAME}`)
+                        .setFooter(
+                            {text: `🔘 Uptime - ${csgotv_hours} ч. ${csgotv_minutes} м.`}
+                        )
+                        .setColor(process.env.WEBHOOK_COLOR)
+
+                    await webhookClient.send({
+                        embeds: [embed]
                     })
-                    .setTitle(`Сервер ${process.env.SERVER_NAME}`)
-                    .setFooter(
-                        {text: `🔘 Uptime - ${parseInt(parseInt(csgotv[0].duration)/3600)} ч.`}
-                    )
-                    .setColor(process.env.WEBHOOK_COLOR)
-
-                await webhookClient.send({
-                    embeds: [embed]
-                })
+                } catch (e) {}
             }, 10000)
         }
         return;
