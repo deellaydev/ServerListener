@@ -11,6 +11,7 @@ const pool = mariadb.createPool({
 
 let warningNotify = true
 let warningCounter = 0
+let errorFlag = false
 
 const webhookClient = new WebhookClient({
   id: process.env.WEBHOOK_URL.split('/')[5],
@@ -28,20 +29,24 @@ async function main() {
   try {
     serverId = await conn.query(`SELECT id FROM servers WHERE ip='${process.env.SERVER_IP}' AND port='${process.env.SERVER_PORT}'`).then(res => res[0].id)
   } catch (e) {
-    const embed = new MessageEmbed()
-      .setAuthor({
-        name: process.env.WEBHOOK_NAME,
-        iconURL: process.env.WEBHOOK_IMG_URL
-      })
-      .setTitle(` :exclamation:  Не найден сервер в базе данных программы ${e.message}`)
-      .setColor('#ff0000')
+    if (!errorFlag) {
+      const embed = new MessageEmbed()
+        .setAuthor({
+          name: process.env.WEBHOOK_NAME,
+          iconURL: process.env.WEBHOOK_IMG_URL
+        })
+        .setTitle(` :exclamation:  Не найден сервер в базе данных программы ${e.message}`)
+        .setColor('#ff0000')
 
-    await webhookClient.send({
-      content: `<@${process.env.DISCORD_USER_ID}>`,
-      embeds: [embed]
-    })
+      await webhookClient.send({
+        content: `<@398890993371316225>`,
+        embeds: [embed]
+      })
+      errorFlag = true
+    }
   }
   try {
+    errorFlag = false
     const data = await info(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 10000)
     conn.query(`INSERT INTO online(sid, date, players) VALUES ('${serverId}',NOW(),'${data.players}')`)
     let csgotv = await players(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 5000).then(data => data.filter(item => item.name === 'VK.COM/LEGSS'))
@@ -202,3 +207,5 @@ setupConnection().then(() => {
 }).catch(e => {
   console.error('unexpected exception', e);
 })
+
+console.log(`${process.env.SERVER_NAME} service is active`)
