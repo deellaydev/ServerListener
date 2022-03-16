@@ -23,7 +23,6 @@ let playersNum = []
 let mapChecker = []
 let uptimes = []
 let serverName = ''
-let playersCheckData;
 
 async function main() {
 
@@ -54,7 +53,7 @@ async function main() {
     let csgotv = await players(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 5000).then(data => data.filter(item => item.name === 'VK.COM/LEGSS'))
     let uptime = `${Math.floor(parseInt(csgotv[0].duration) / 3600)} ч. ${Math.floor(parseInt(csgotv[0].duration) / 60) - ((Math.floor(parseInt(csgotv[0].duration) / 3600)) * 60)} м.`
 
-    playersCheckData = await playersCountCheck(data.players, data.map, uptime)
+    let playersCheckData = await playersCountCheck(data.players, data.map, uptime)
 
     if (playersCheckData.warning) {
       const embed = new MessageEmbed()
@@ -129,15 +128,17 @@ async function main() {
   }
 }
 
-function playersCountCheck(players, map, uptime) {
+function playersCountCheck(players = 0, map = '', uptime = '') {
 
-  playersNum.push(players)
-  mapChecker.push(map)
-  uptimes.push(uptime)
-  if (playersNum.length > 2) {
-    playersNum.shift()
-    mapChecker.shift()
-    uptimes.shift()
+  if (players && map && uptime){
+    playersNum.push(players)
+    mapChecker.push(map)
+    uptimes.push(uptime)
+    if (playersNum.length > 2) {
+      playersNum.shift()
+      mapChecker.shift()
+      uptimes.shift()
+    }
   }
   if (playersNum.length === 2) {
     return {
@@ -157,6 +158,8 @@ function playersCountCheck(players, map, uptime) {
 function warningNotifyCheck() {
 
   if (warningNotify && warningCounter !== +process.env.MAX_WARNING_COUNTER) {
+
+    let playersCheckData = playersCountCheck()
 
     const embed = new MessageEmbed()
       .setAuthor({
