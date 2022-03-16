@@ -21,7 +21,9 @@ const webhookClient = new WebhookClient({
 let conn;
 let playersNum = []
 let mapChecker = []
-let uptimes = ['-', '-']
+let uptimes = []
+let serverName = ''
+let playersCheckData;
 
 async function main() {
 
@@ -31,7 +33,7 @@ async function main() {
     if (!errorFlag) {
       const embed = new MessageEmbed()
         .setAuthor({
-          name: process.env.WEBHOOK_NAME,
+          name: serverName || process.env.SERVER_NAME,
           iconURL: process.env.WEBHOOK_IMG_URL
         })
         .setTitle(` :exclamation:  Не найден сервер в базе данных программы ${e.message}`)
@@ -46,21 +48,21 @@ async function main() {
   }
   try {
     let serverId = await conn.query(`SELECT id FROM servers WHERE ip='${process.env.SERVER_IP}' AND port='${process.env.SERVER_PORT}'`).then(res => res[0].id)
-    errorFlag = false
+    // errorFlag = false
     const data = await info(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 10000)
     conn.query(`INSERT INTO online(sid, date, players) VALUES ('${serverId}',NOW(),'${data.players}')`)
     let csgotv = await players(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 5000).then(data => data.filter(item => item.name === 'VK.COM/LEGSS'))
     let uptime = `${Math.floor(parseInt(csgotv[0].duration) / 3600)} ч. ${Math.floor(parseInt(csgotv[0].duration) / 60) - ((Math.floor(parseInt(csgotv[0].duration) / 3600)) * 60)} м.`
 
-    let playersCheckData = await playersCountCheck(data.players, data.map, uptime)
+    playersCheckData = await playersCountCheck(data.players, data.map, uptime)
 
     if (playersCheckData.warning) {
       const embed = new MessageEmbed()
         .setAuthor({
-          name: process.env.WEBHOOK_NAME,
+          name: serverName || process.env.SERVER_NAME,
           iconURL: process.env.WEBHOOK_IMG_URL
         })
-        .setTitle(` :exclamation:  Резкое падение онлайна на сервере ${process.env.SERVER_NAME}`)
+        .setTitle(` :exclamation:  Резкое падение онлайна на сервере`)
         .setFields(
           {name: 'Было', value: `${playersCheckData.prevPlayers}\n${playersCheckData.prevMap}`, inline: true},
           {name: 'Стало', value: `${playersCheckData.currentPlayers}\n${playersCheckData.currentMap}`, inline: true}
@@ -81,28 +83,28 @@ async function main() {
     await conn.end()
   } catch (e) {
     warningNotifyCheck()
-    if (warningCounter === 1) {
-      setTimeout(async () => {
-        try {
-          const embed = new MessageEmbed()
-            .setAuthor({
-              name: process.env.WEBHOOK_NAME,
-              iconURL: process.env.WEBHOOK_IMG_URL
-            })
-            .setTitle(`Сервер ${process.env.SERVER_NAME}`)
-            .setFooter(
-              {text: `🔘 Uptime - ${uptimes[1]} \n🔘 Previous uptime - ${uptimes[0]}`}
-            )
-            .setColor(process.env.WEBHOOK_COLOR)
-
-          await webhookClient.send({
-            embeds: [embed]
-          })
-        } catch (e) {
-        }
-      }, 10000)
-    }
-    return;
+    // if (warningCounter === 1) {
+    //   setTimeout(async () => {
+    //     try {
+    //       const embed = new MessageEmbed()
+    //         .setAuthor({
+    //           name: serverName || process.env.SERVER_NAME,
+    //           iconURL: process.env.WEBHOOK_IMG_URL
+    //         })
+    //         .setTitle(`Сервер ${process.env.SERVER_NAME}`)
+    //         .setFooter(
+    //           {text: `🔘 Uptime - ${playersCheckData.currentUptime} \n🔘 Previous uptime - ${playersCheckData.prevUptime}`}
+    //         )
+    //         .setColor(process.env.WEBHOOK_COLOR)
+    //
+    //       await webhookClient.send({
+    //         embeds: [embed]
+    //       })
+    //     } catch (e) {
+    //     }
+    //   }, 10000)
+    // }
+    // return;
   }
 
   try {
@@ -112,7 +114,7 @@ async function main() {
 
       const embed = new MessageEmbed()
         .setAuthor({
-          name: process.env.WEBHOOK_NAME,
+          name: serverName || process.env.SERVER_NAME,
           iconURL: process.env.WEBHOOK_IMG_URL
         })
         .setTitle(` :green_circle: Оповещение сервера ${process.env.SERVER_NAME} включено`)
@@ -158,13 +160,13 @@ function warningNotifyCheck() {
 
     const embed = new MessageEmbed()
       .setAuthor({
-        name: process.env.WEBHOOK_NAME,
+        name: serverName || process.env.SERVER_NAME,
         iconURL: process.env.WEBHOOK_IMG_URL
       })
       .setTitle(`Сервер ${process.env.SERVER_NAME} не отвечает`)
       .setColor(process.env.WEBHOOK_COLOR)
       .setFooter(
-        {text: `Предупреждение - ${++warningCounter}/${process.env.MAX_WARNING_COUNTER}\n🔘 Uptime - ${uptimes[1]} \n🔘 Previous uptime - ${uptimes[0]}`}
+        {text: `Предупреждение - ${++warningCounter}/${process.env.MAX_WARNING_COUNTER}\n🔘 Previous uptime - ${playersCheckData.prevUptime}`}
       )
 
     webhookClient.send({
@@ -177,7 +179,7 @@ function warningNotifyCheck() {
 
       const embed = new MessageEmbed()
         .setAuthor({
-          name: process.env.WEBHOOK_NAME,
+          name: serverName || process.env.SERVER_NAME,
           iconURL: process.env.WEBHOOK_IMG_URL
         })
         .setTitle(` :red_circle: Оповещение сервера ${process.env.SERVER_NAME} отключено`)
