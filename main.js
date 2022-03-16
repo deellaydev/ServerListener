@@ -21,13 +21,12 @@ const webhookClient = new WebhookClient({
 let conn;
 let playersNum = []
 let mapChecker = []
-let uptimes = []
+let uptimes = ['-', '-']
 
 async function main() {
 
-  let serverId = 0;
   try {
-    serverId = await conn.query(`SELECT id FROM servers WHERE ip='${process.env.SERVER_IP}' AND port='${process.env.SERVER_PORT}'`).then(res => res[0].id)
+    let serverId = await conn.query(`SELECT id FROM servers WHERE ip='${process.env.SERVER_IP}' AND port='${process.env.SERVER_PORT}'`).then(res => res[0].id)
   } catch (e) {
     if (!errorFlag) {
       const embed = new MessageEmbed()
@@ -46,6 +45,7 @@ async function main() {
     }
   }
   try {
+    let serverId = await conn.query(`SELECT id FROM servers WHERE ip='${process.env.SERVER_IP}' AND port='${process.env.SERVER_PORT}'`).then(res => res[0].id)
     errorFlag = false
     const data = await info(`${process.env.SERVER_IP}`, process.env.SERVER_PORT, 10000)
     conn.query(`INSERT INTO online(sid, date, players) VALUES ('${serverId}',NOW(),'${data.players}')`)
@@ -91,7 +91,7 @@ async function main() {
             })
             .setTitle(`Сервер ${process.env.SERVER_NAME}`)
             .setFooter(
-              {text: `🔘 Uptime - ${playersCheckData.currentUptime} \n🔘 Previous uptime - ${playersCheckData.prevUptime}`}
+              {text: `🔘 Uptime - ${uptimes[1]} \n🔘 Previous uptime - ${uptimes[0]}`}
             )
             .setColor(process.env.WEBHOOK_COLOR)
 
@@ -164,7 +164,7 @@ function warningNotifyCheck() {
       .setTitle(`Сервер ${process.env.SERVER_NAME} не отвечает`)
       .setColor(process.env.WEBHOOK_COLOR)
       .setFooter(
-        {text: `Предупреждение - ${++warningCounter}/${process.env.MAX_WARNING_COUNTER}`}
+        {text: `Предупреждение - ${++warningCounter}/${process.env.MAX_WARNING_COUNTER}\n🔘 Uptime - ${uptimes[1]} \n🔘 Previous uptime - ${uptimes[0]}`}
       )
 
     webhookClient.send({
