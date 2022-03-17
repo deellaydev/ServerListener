@@ -9,6 +9,7 @@ const pool = mariadb.createPool({
   database: process.env.DATABASE_NAME,
 })
 
+//Variables, for notification
 let warningNotify = true
 let warningCounter = 0
 let errorFlag = false
@@ -18,6 +19,8 @@ const webhookClient = new WebhookClient({
   token: process.env.WEBHOOK_URL.split('/')[6]
 })
 
+
+//Variables needed for the entire environment
 let serverId;
 let conn;
 let playersNum = []
@@ -27,6 +30,7 @@ let serverName = ''
 
 async function main() {
 
+  //Checking for the existence of a server in the database
   try {
     serverId = await conn.query(`SELECT id FROM servers WHERE ip='${process.env.SERVER_IP}' AND port='${process.env.SERVER_PORT}'`).then(res => res[0].id)
   } catch (e) {
@@ -46,13 +50,14 @@ async function main() {
       errorFlag = true
     }
   }
+
   try {
     serverId = await conn.query(`SELECT id FROM servers WHERE ip='${process.env.SERVER_IP}' AND port='${process.env.SERVER_PORT}'`).then(res => res[0].id)
     errorFlag = false
     const data = await info(`${process.env.SERVER_IP}`, Number(process.env.SERVER_PORT), 10000)
     serverName = data.name.trim()
     conn.query(`INSERT INTO online(sid, date, players) VALUES ('${serverId}',NOW(),'${data.players}')`)
-    let csgotv = await players(`${process.env.SERVER_IP}`, Number(process.env.SERVER_PORT), 5000).then(data => data.filter(item => item.name === ''))
+    let csgotv = await players(`${process.env.SERVER_IP}`, Number(process.env.SERVER_PORT), 5000).then(data => data.filter(item => item.name === 'VK.COM/LEGSS'))
     let uptime = `${Math.floor(csgotv[0].duration / 3600)} ч. ${Math.floor(csgotv[0].duration / 60) - ((Math.floor(csgotv[0].duration / 3600)) * 60)} м.`
 
     let playersCheckData = await playersCountCheck(data.players, data.map, uptime)
@@ -84,28 +89,6 @@ async function main() {
     await conn.end()
   } catch (e) {
     warningNotifyCheck()
-    // if (warningCounter === 1) {
-    //   setTimeout(async () => {
-    //     try {
-    //       const embed = new MessageEmbed()
-    //         .setAuthor({
-    //           name: serverName || process.env.SERVER_NAME,
-    //           iconURL: process.env.WEBHOOK_IMG_URL
-    //         })
-    //         .setTitle(`Сервер ${process.env.SERVER_NAME}`)
-    //         .setFooter(
-    //           {text: `🔘 Uptime - ${playersCheckData.currentUptime} \n🔘 Previous uptime - ${playersCheckData.prevUptime}`}
-    //         )
-    //         .setColor(process.env.WEBHOOK_COLOR)
-    //
-    //       await webhookClient.send({
-    //         embeds: [embed]
-    //       })
-    //     } catch (e) {
-    //     }
-    //   }, 10000)
-    // }
-    // return;
   }
 
   try {
